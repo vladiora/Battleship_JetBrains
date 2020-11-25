@@ -163,7 +163,7 @@ public class Main {
         handleError(startDes, endDes, 1, scanner, board);
     }
 
-    public static void gameplay(char[][] board, Scanner scanner) {
+    public static void gameplay(char[][] board, Scanner scanner, char[][] fogBoard) {
         System.out.println("Take a shot!");
         String shot = scanner.next();
         int letter = shot.charAt(0) - 65;
@@ -176,12 +176,16 @@ public class Main {
         }
         if (board[letter][num] == 'O') {
             board[letter][num] = 'X';
-            printBoard(board);
+            fogBoard[letter][num] = 'X';
+            printBoard(fogBoard);
             System.out.println("You hit a ship!");
+            printBoard(board);
         } else {
             board[letter][num] = 'M';
-            printBoard(board);
+            fogBoard[letter][num] = 'M';
+            printBoard(fogBoard);
             System.out.println("You missed!");
+            printBoard(board);
         }
 
     }
@@ -189,12 +193,14 @@ public class Main {
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
         char[][] board = new char[10][10];
+        char[][] fogBoard = new char[10][10];
         newBoard(board);
         printBoard(board);
         takePosition(board, scanner);
         System.out.println("The game starts!");
-        printBoard(board);
-        gameplay(board, scanner);
+        newBoard(fogBoard);
+        printBoard(fogBoard);
+        gameplay(board, scanner, fogBoard);
 
 
     }
