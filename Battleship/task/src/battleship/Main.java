@@ -163,8 +163,54 @@ public class Main {
         handleError(startDes, endDes, 1, scanner, board);
     }
 
+    public static boolean win(char[][] board, char[][] fogBoard) {
+        for (int i = 0; i < 10; i ++) {
+            for (int j = 0; j < 10; j++) {
+                if (board[i][j] == 'O' && fogBoard[i][j] != 'X') {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    public static boolean sankShip(char[][] board, char[][] fogBoard, int letter, int num) {
+        for (int i = letter; i < 10; i ++) {
+            if (board[i][num] == '~') {
+                break;
+            }
+            if (board[i][num] == 'O' && fogBoard[i][num] != 'X') {
+                return false;
+            }
+        }
+        for (int i = letter; i >= 0; i--) {
+            if (board[i][num] == '~') {
+                break;
+            }
+            if (board[i][num] == 'O' && fogBoard[i][num] != 'X') {
+                return false;
+            }
+        }
+        for (int i = num; i < 10; i++) {
+            if (board[letter][i] == '~') {
+                break;
+            }
+            if (board[letter][i] == 'O' && fogBoard[letter][i] != 'X') {
+                return false;
+            }
+        }
+        for (int i = num; i >= 0; i--) {
+            if (board[letter][i] == '~') {
+                break;
+            }
+            if (board[letter][i] == 'O' && fogBoard[letter][i] != 'X') {
+                return false;
+            }
+        }
+        return true;
+    }
+
     public static void gameplay(char[][] board, Scanner scanner, char[][] fogBoard) {
-        System.out.println("Take a shot!");
         String shot = scanner.next();
         int letter = shot.charAt(0) - 65;
         int num = Integer.parseInt(shot.substring(1)) - 1;
@@ -175,17 +221,19 @@ public class Main {
             num = Integer.parseInt(shot.substring(1)) - 1;
         }
         if (board[letter][num] == 'O') {
-            board[letter][num] = 'X';
             fogBoard[letter][num] = 'X';
             printBoard(fogBoard);
-            System.out.println("You hit a ship!");
-            printBoard(board);
+            if (win(board, fogBoard)) {
+                System.out.println("You sank the last ship. You won. Congratulations!");
+            } else if (sankShip(board, fogBoard, letter, num)) {
+                System.out.println("You sank a ship! Specify a new target:");
+            } else {
+                System.out.println("You hit a ship! Try again:");
+            }
         } else {
-            board[letter][num] = 'M';
             fogBoard[letter][num] = 'M';
             printBoard(fogBoard);
-            System.out.println("You missed!");
-            printBoard(board);
+            System.out.println("You missed! Try again:");
         }
 
     }
@@ -200,7 +248,10 @@ public class Main {
         System.out.println("The game starts!");
         newBoard(fogBoard);
         printBoard(fogBoard);
-        gameplay(board, scanner, fogBoard);
+        System.out.println("Take a shot!");
+        while (!win(board, fogBoard)) {
+            gameplay(board, scanner, fogBoard);
+        }
 
 
     }
