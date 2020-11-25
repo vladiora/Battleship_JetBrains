@@ -163,12 +163,39 @@ public class Main {
         handleError(startDes, endDes, 1, scanner, board);
     }
 
+    public static void gameplay(char[][] board, Scanner scanner) {
+        System.out.println("Take a shot!");
+        String shot = scanner.next();
+        int letter = shot.charAt(0) - 65;
+        int num = Integer.parseInt(shot.substring(1)) - 1;
+        while (letter < 0 || letter > 9 || num < 0 || num > 9) {
+            System.out.println("Error! You entered the wrong coordinates! Try again:");
+            shot = scanner.next();
+            letter = shot.charAt(0) - 65;
+            num = Integer.parseInt(shot.substring(1)) - 1;
+        }
+        if (board[letter][num] == 'O') {
+            board[letter][num] = 'X';
+            printBoard(board);
+            System.out.println("You hit a ship!");
+        } else {
+            board[letter][num] = 'M';
+            printBoard(board);
+            System.out.println("You missed!");
+        }
+
+    }
+
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
         char[][] board = new char[10][10];
         newBoard(board);
         printBoard(board);
         takePosition(board, scanner);
+        System.out.println("The game starts!");
+        printBoard(board);
+        gameplay(board, scanner);
+
 
     }
 }
