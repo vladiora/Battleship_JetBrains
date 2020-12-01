@@ -1,4 +1,5 @@
 package battleship;
+import java.io.IOException;
 import java.util.*;
 
 public class Main {
@@ -220,37 +221,72 @@ public class Main {
             letter = shot.charAt(0) - 65;
             num = Integer.parseInt(shot.substring(1)) - 1;
         }
-        if (board[letter][num] == 'O') {
+        if (board[letter][num] == 'O' || board[letter][num] == 'X') {
             fogBoard[letter][num] = 'X';
-            printBoard(fogBoard);
+            board[letter][num] = 'X';
             if (win(board, fogBoard)) {
                 System.out.println("You sank the last ship. You won. Congratulations!");
             } else if (sankShip(board, fogBoard, letter, num)) {
-                System.out.println("You sank a ship! Specify a new target:");
+                System.out.println("You sank a ship!");
             } else {
-                System.out.println("You hit a ship! Try again:");
+                System.out.println("You hit a ship!");
             }
         } else {
             fogBoard[letter][num] = 'M';
-            printBoard(fogBoard);
-            System.out.println("You missed! Try again:");
+            board[letter][num] = 'M';
+            System.out.println("You missed!");
         }
 
     }
 
+    public static void promptEnterKey() {
+        System.out.println("Press Enter and pass the move to another player");
+        try {
+            System.in.read();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
-        char[][] board = new char[10][10];
-        char[][] fogBoard = new char[10][10];
-        newBoard(board);
-        printBoard(board);
-        takePosition(board, scanner);
-        System.out.println("The game starts!");
-        newBoard(fogBoard);
-        printBoard(fogBoard);
-        System.out.println("Take a shot!");
-        while (!win(board, fogBoard)) {
-            gameplay(board, scanner, fogBoard);
+        char[][] boardPlayer1 = new char[10][10];
+        char[][] boardPlayer2 = new char[10][10];
+        char[][] fogBoard1 = new char[10][10];
+        char[][] fogBoard2 = new char[10][10];
+
+        newBoard(boardPlayer1);
+        System.out.println("Player 1, place your ships on the game field");
+        printBoard(boardPlayer1);
+        takePosition(boardPlayer1, scanner);
+        promptEnterKey();
+
+        newBoard(boardPlayer2);
+        System.out.println("Player 2, place your ships on the game field");
+        printBoard(boardPlayer2);
+        takePosition(boardPlayer2, scanner);
+        promptEnterKey();
+
+        newBoard(fogBoard1);
+        newBoard(fogBoard2);
+        while (!win(boardPlayer1, fogBoard1) && !win(boardPlayer2, fogBoard2)) {
+            printBoard(fogBoard2);
+            System.out.println("---------------------");
+            printBoard(boardPlayer1);
+            System.out.println("Player 1, it's your turn:");
+            gameplay(boardPlayer2, scanner, fogBoard2);
+            promptEnterKey();
+
+            if (win(boardPlayer2, fogBoard2)) {
+                break;
+            }
+
+            printBoard(fogBoard1);
+            System.out.println("---------------------");
+            printBoard(boardPlayer2);
+            System.out.println("Player 2, it's your turn:");
+            gameplay(boardPlayer1, scanner, fogBoard1);
+            promptEnterKey();
         }
 
 
