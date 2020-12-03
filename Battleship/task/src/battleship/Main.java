@@ -3,13 +3,93 @@ import java.io.IOException;
 import java.util.*;
 
 public class Main {
-    public static void newBoard(char[][] board) {
+
+    public static void main(String[] args) {
+        Gameplay gp = new Gameplay();
+        gp.start();
+
+    }
+}
+
+class Gameplay {
+
+    protected char[][] boardPlayer1 = new char[10][10];
+    protected char[][] boardPlayer2 = new char[10][10];
+    protected char[][] fogBoard1 = new char[10][10];
+    protected char[][] fogBoard2 = new char[10][10];
+    Scanner scanner = new Scanner(System.in);
+
+    public Gameplay() {
+        this.boardPlayer1 = newBoard(boardPlayer1);
+        this.boardPlayer2 = newBoard(boardPlayer2);
+        this.fogBoard1 = newBoard(fogBoard1);
+        this.fogBoard2 = newBoard(fogBoard2);
+    }
+
+    public char[][] newBoard(char[][] board) {
         for (char[] row: board) {
             Arrays.fill(row, '~');
         }
+        return board;
     }
 
-    public static void printBoard(char[][] board) {
+    public void start() {
+        makeBoards();
+        battle();
+    }
+
+    public void battle() {
+        while (!win(boardPlayer1, fogBoard1) && !win(boardPlayer2, fogBoard2)) {
+            printBoard(fogBoard2);
+            System.out.println("---------------------");
+            printBoard(boardPlayer1);
+            System.out.println("Player 1, it's your turn:");
+            play(boardPlayer2, fogBoard2);
+            promptEnterKey();
+
+            if (win(boardPlayer2, fogBoard2)) {
+                break;
+            }
+
+            printBoard(fogBoard1);
+            System.out.println("---------------------");
+            printBoard(boardPlayer2);
+            System.out.println("Player 2, it's your turn:");
+            play(boardPlayer1, fogBoard1);
+            promptEnterKey();
+        }
+    }
+
+    public void makeBoards() {
+        System.out.println("Player 1, place your ships on the game field");
+        printBoard(boardPlayer1);
+        boolean invalidInput;
+        do {
+            try {
+                invalidInput = false;
+                takePosition(boardPlayer1);
+            } catch (Exception e) {
+                System.out.println("Wrong input! Place your ships again");
+                invalidInput = true;
+            }
+        } while(invalidInput);
+        promptEnterKey();
+
+        System.out.println("Player 2, place your ships on the game field");
+        printBoard(boardPlayer2);
+        do {
+            try {
+                invalidInput = false;
+                takePosition(boardPlayer2);
+            } catch (Exception e) {
+                System.out.println("Wrong input! Place your ships again");
+                invalidInput = true;
+            }
+        } while(invalidInput);
+        promptEnterKey();
+    }
+
+    public void printBoard(char[][] board) {
         System.out.println("  1 2 3 4 5 6 7 8 9 10");
         for (int i = 0; i < board.length; i++) {
             System.out.print((char)(i + 65) + " ");
@@ -20,24 +100,16 @@ public class Main {
         }
     }
 
-    public static void addShip(char[][] board, String start, String end) {
-        int startLetter = start.charAt(0) - 65;
-        int startNum = Integer.parseInt(start.substring(1)) - 1;
-        int endLetter = end.charAt(0) - 65;
-        int endNum = Integer.parseInt(end.substring(1)) - 1;
-        if (startLetter == endLetter) {
-            for (int i = Math.min(startNum, endNum); i <= Math.max(startNum, endNum); i++) {
-                board[startLetter][i] = 'O';
-            }
-        } else if(startNum == endNum) {
-            for (int i = Math.min(startLetter, endLetter); i <= Math.max(startLetter, endLetter); i++) {
-                board[i][startNum] = 'O';
-            }
+    public void promptEnterKey() {
+        System.out.println("Press Enter and pass the move to another player");
+        try {
+            System.in.read();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
-        printBoard(board);
     }
 
-    public static boolean lengthOfShip(String start, String end, int length) {
+    public boolean lengthOfShip(String start, String end, int length) {
         int startLetter = start.charAt(0) - 65;
         int startNum = Integer.parseInt(start.substring(1)) - 1;
         int endLetter = end.charAt(0) - 65;
@@ -45,7 +117,7 @@ public class Main {
         return Math.abs(startLetter - endLetter) != length && Math.abs(startNum - endNum) != length;
     }
 
-    public static boolean wrongLocation(String start, String end) {
+    public boolean wrongLocation(String start, String end) {
         int startLetter = start.charAt(0) - 65;
         int startNum = Integer.parseInt(start.substring(1)) - 1;
         int endLetter = end.charAt(0) - 65;
@@ -53,7 +125,7 @@ public class Main {
         return startLetter != endLetter && startNum != endNum;
     }
 
-    public static boolean tooClose(String start, String end, char[][] board) {
+    public boolean tooClose(String start, String end, char[][] board) {
         int startLetter = start.charAt(0) - 65;
         int startNum = Integer.parseInt(start.substring(1)) - 1;
         int endLetter = end.charAt(0) - 65;
@@ -116,7 +188,24 @@ public class Main {
         return false;
     }
 
-    public static void handleError(String start, String end, int length, Scanner scanner, char[][] board) {
+    public void addShip(char[][] board, String start, String end) {
+        int startLetter = start.charAt(0) - 65;
+        int startNum = Integer.parseInt(start.substring(1)) - 1;
+        int endLetter = end.charAt(0) - 65;
+        int endNum = Integer.parseInt(end.substring(1)) - 1;
+        if (startLetter == endLetter) {
+            for (int i = Math.min(startNum, endNum); i <= Math.max(startNum, endNum); i++) {
+                board[startLetter][i] = 'O';
+            }
+        } else if(startNum == endNum) {
+            for (int i = Math.min(startLetter, endLetter); i <= Math.max(startLetter, endLetter); i++) {
+                board[i][startNum] = 'O';
+            }
+        }
+        printBoard(board);
+    }
+
+    public void handleError(String start, String end, int length, char[][] board) {
         if(wrongLocation(start, end)) {
             while (wrongLocation(start, end)) {
                 System.out.println("Error! Wrong ship location! Try again:");
@@ -137,34 +226,34 @@ public class Main {
         addShip(board, start, end);
     }
 
-    public static void takePosition(char[][] board, Scanner scanner) {
+    public void takePosition(char[][] board) {
         System.out.println("Enter the coordinates of the Aircraft Carrier (5 cells):");
         String startAir = scanner.next();
         String endAir = scanner.next();
-        handleError(startAir, endAir, 4, scanner, board);
+        handleError(startAir, endAir, 4, board);
 
         System.out.println("Enter the coordinates of the Battleship (4 cells):");
         String startBattle = scanner.next();
         String endBattle = scanner.next();
-        handleError(startBattle, endBattle, 3, scanner, board);
+        handleError(startBattle, endBattle, 3, board);
 
         System.out.println("Enter the coordinates of the Submarine (3 cells):");
         String startSub = scanner.next();
         String endSub = scanner.next();
-        handleError(startSub, endSub, 2, scanner, board);
+        handleError(startSub, endSub, 2, board);
 
         System.out.println("Enter the coordinates of the Cruiser (3 cells):");
         String startCru = scanner.next();
         String endCru = scanner.next();
-        handleError(startCru, endCru, 2, scanner, board);
+        handleError(startCru, endCru, 2, board);
 
         System.out.println("Enter the coordinates of the Destroyer (2 cells):");
         String startDes = scanner.next();
         String endDes = scanner.next();
-        handleError(startDes, endDes, 1, scanner, board);
+        handleError(startDes, endDes, 1, board);
     }
 
-    public static boolean win(char[][] board, char[][] fogBoard) {
+    public boolean win(char[][] board, char[][] fogBoard) {
         for (int i = 0; i < 10; i ++) {
             for (int j = 0; j < 10; j++) {
                 if (board[i][j] == 'O' && fogBoard[i][j] != 'X') {
@@ -175,7 +264,7 @@ public class Main {
         return true;
     }
 
-    public static boolean sankShip(char[][] board, char[][] fogBoard, int letter, int num) {
+    public boolean sankShip(char[][] board, char[][] fogBoard, int letter, int num) {
         for (int i = letter; i < 10; i ++) {
             if (board[i][num] == '~') {
                 break;
@@ -211,7 +300,7 @@ public class Main {
         return true;
     }
 
-    public static void gameplay(char[][] board, Scanner scanner, char[][] fogBoard) {
+    public void play(char[][] board, char[][] fogBoard) {
         String shot = scanner.next();
         int letter = shot.charAt(0) - 65;
         int num = Integer.parseInt(shot.substring(1)) - 1;
@@ -239,56 +328,4 @@ public class Main {
 
     }
 
-    public static void promptEnterKey() {
-        System.out.println("Press Enter and pass the move to another player");
-        try {
-            System.in.read();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public static void main(String[] args) {
-        Scanner scanner = new Scanner(System.in);
-        char[][] boardPlayer1 = new char[10][10];
-        char[][] boardPlayer2 = new char[10][10];
-        char[][] fogBoard1 = new char[10][10];
-        char[][] fogBoard2 = new char[10][10];
-
-        newBoard(boardPlayer1);
-        System.out.println("Player 1, place your ships on the game field");
-        printBoard(boardPlayer1);
-        takePosition(boardPlayer1, scanner);
-        promptEnterKey();
-
-        newBoard(boardPlayer2);
-        System.out.println("Player 2, place your ships on the game field");
-        printBoard(boardPlayer2);
-        takePosition(boardPlayer2, scanner);
-        promptEnterKey();
-
-        newBoard(fogBoard1);
-        newBoard(fogBoard2);
-        while (!win(boardPlayer1, fogBoard1) && !win(boardPlayer2, fogBoard2)) {
-            printBoard(fogBoard2);
-            System.out.println("---------------------");
-            printBoard(boardPlayer1);
-            System.out.println("Player 1, it's your turn:");
-            gameplay(boardPlayer2, scanner, fogBoard2);
-            promptEnterKey();
-
-            if (win(boardPlayer2, fogBoard2)) {
-                break;
-            }
-
-            printBoard(fogBoard1);
-            System.out.println("---------------------");
-            printBoard(boardPlayer2);
-            System.out.println("Player 2, it's your turn:");
-            gameplay(boardPlayer1, scanner, fogBoard1);
-            promptEnterKey();
-        }
-
-
-    }
 }
