@@ -3,3 +3,6 @@ Battleship (also called Battleships or Sea Battle) is a two-player strategy game
 
 ## Rules
 There are different variations of the Battleship game, but we will stick to the original rules written by Milton Bradley. You have a 10×10 game field and five ships to arrange on that field. The ships can be placed horizontally or vertically but not diagonally across the grid spaces; the ships should not cross or touch each other. The goal is to sink all the ships of the opponent before your opponent does this to you.
+
+## Goal
+This project's goal is implementing well known pen and paper game while practicing user input and exception handling.
